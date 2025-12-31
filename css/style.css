@@ -71,6 +71,11 @@ body {
   color: #555;
 }
 
+.post-content {
+  margin: 1.5rem 0;
+}
+
+
 /* Footer */
 .site-footer {
   text-align: center;
