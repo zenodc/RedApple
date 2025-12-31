@@ -113,6 +113,33 @@ function renderComments(postId) {
   });
 }
 
+function setupCommentForm(postId) {
+  const form = document.getElementById("comment-form");
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const author = document.getElementById("author").value;
+    const text = document.getElementById("comment-text").value;
+
+    const newComment = {
+      author,
+      text,
+      date: new Date().toISOString()
+    };
+
+    if (!mockComments[postId]) {
+      mockComments[postId] = [];
+    }
+
+    mockComments[postId].push(newComment);
+
+    form.reset();
+    renderComments(postId);
+  });
+}
+
+
 
 // 4. Avvio
 document.addEventListener("DOMContentLoaded", () => {
