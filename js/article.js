@@ -25,6 +25,31 @@ const mockPosts = [
   }
 ];
 
+// Commenti mock
+const mockComments = {
+  1: [
+    {
+      author: "Mario",
+      text: "Articolo molto interessante, grazie.",
+      date: "2025-01-02"
+    }
+  ],
+  2: [
+    {
+      author: "Laura",
+      text: "Condivido pienamente il discorso sulla musica.",
+      date: "2025-01-11"
+    },
+    {
+      author: "Giovanni",
+      text: "Bellissimo riferimento al jazz.",
+      date: "2025-01-12"
+    }
+  ],
+  3: []
+};
+
+
 // 2. Legge l'id dall'URL
 function getPostId() {
   const params = new URLSearchParams(window.location.search);
@@ -58,6 +83,36 @@ function renderPost(post) {
     </ul>
   `;
 }
+
+function renderComments(postId) {
+  const list = document.getElementById("comments-list");
+  list.innerHTML = "";
+
+  const comments = mockComments[postId] || [];
+
+  if (comments.length === 0) {
+    list.innerHTML = "<p>Nessun commento.</p>";
+    return;
+  }
+
+  comments.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "comment";
+
+    div.innerHTML = `
+      <div class="comment-meta">
+        <strong>${c.author}</strong> — 
+        ${new Date(c.date).toLocaleDateString("it-IT")}
+      </div>
+      <div class="comment-text">
+        ${c.text}
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
 
 // 4. Avvio
 document.addEventListener("DOMContentLoaded", () => {
