@@ -146,4 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const postId = getPostId();
   const post = mockPosts.find(p => p.id === postId);
   renderPost(post);
+  renderComments(postId);
+  setupCommentForm(postId);
 });
