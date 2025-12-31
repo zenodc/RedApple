@@ -1,14 +1,48 @@
-<!doctype html>
-<html>
-  <head>
-    <title>Pagina di prova di Zeno</title>
-  </head>
-  <body>
-    <p>Questa è una pagina di <strong>prova</strong>, i file sono in un repository <strong>github</strong> e il webserver è in un container su <strong>Render</p>
-    <p>Evviva</p>
-    Quello che segue è un numero casuale:<br />
-<?php
-echo rand();
-?>
-  </body>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Il mio Blog</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>Il mio Blog</h1>
+    <p class="subtitle">Appunti, idee e riflessioni</p>
+  </header>
+
+  <main class="content">
+    <section id="articles">
+
+      <!-- Articolo di esempio (statico, poi sarà dinamico) -->
+      <article class="post">
+        <h2 class="post-title">
+          <a href="article.html?id=1">Titolo dell’articolo</a>
+        </h2>
+
+        <div class="post-meta">
+          <time datetime="2025-01-01">1 gennaio 2025</time>
+        </div>
+
+        <p class="post-excerpt">
+          Questo è un breve estratto dell’articolo. Servirà a invogliare
+          il lettore ad aprire il post completo.
+        </p>
+
+        <ul class="post-tags">
+          <li>#filosofia</li>
+          <li>#musica</li>
+        </ul>
+      </article>
+
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2025 — Il mio Blog</p>
+  </footer>
+
+</body>
 </html>
