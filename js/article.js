@@ -1,29 +1,29 @@
 // js/article.js
 
 // 1. Stessi articoli mock di blog.js
-const mockPosts = [
-  {
-    id: 1,
-    title: "Il primo articolo del blog",
-    text: "Questo è il testo completo del primo articolo. Serve solo come esempio per verificare il rendering dinamico della pagina principale.",
-    date: "2025-01-01",
-    tags: ["filosofia", "scrittura"]
-  },
-  {
-    id: 2,
-    title: "Un pensiero sulla musica",
-    text: "La musica non è solo suono, ma forma del tempo. Questo articolo è un altro esempio di contenuto che verrà caricato dinamicamente.",
-    date: "2025-01-10",
-    tags: ["musica", "jazz"]
-  },
-  {
-    id: 3,
-    title: "Appunti sparsi",
-    text: "A volte un blog nasce proprio così: da appunti sparsi che lentamente trovano una struttura.",
-    date: "2025-01-20",
-    tags: ["note"]
+function getSlug() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('slug');
+}
+
+async function fetchPost(slug) {
+  try {
+    const res = await fetch(`https://blog-comments-api.onrender.com/posts/${slug}`);
+    if (!res.ok) throw new Error('Post non trovato');
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return null;
   }
-];
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const slug = getSlug();
+  const post = await fetchPost(slug);
+  renderPost(post);
+  renderComments(post?._id); // qui puoi poi fare fetch commenti reali
+});
+
 
 // Commenti mock
 const mockComments = {
