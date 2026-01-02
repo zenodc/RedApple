@@ -1,6 +1,6 @@
 // js/admin.js
 
-const API_BASE = 'https://blog-comments-api.onrender.com';
+const API_BASE = 'https://redapple-lreq.onrender.com/';
 
 let token = null;
 
