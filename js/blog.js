@@ -76,16 +76,12 @@ function renderPosts(posts) {
         ${createExcerpt(post.text)}
       </p>
 
-      <ul class="post-tags">
-        ${post.tags.map(tag => `<li>#${tag}</li>`).join("")}
-      </ul>
-    `;
+     // <ul class="post-tags">
+   //     ${post.tags.map(tag => `<li>#${tag}</li>`).join("")}
+  //    </ul>
+  //  `;
 
     container.appendChild(article);
   });
 }
 
-// 4. Avvio quando il DOM è pronto
-document.addEventListener("DOMContentLoaded", () => {
-  renderPosts(mockPosts);
-});
