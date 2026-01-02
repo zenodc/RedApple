@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Blog</title>
+  <style>
+    body { font-family: Arial; margin: 2rem; }
+    input, textarea, button { display: block; margin: 0.5rem 0; width: 300px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>Admin Blog</h1>
+
+  <!-- LOGIN -->
+  <div id="login-section">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="login-btn">Accedi</button>
+    <p id="login-msg"></p>
+  </div>
+
+  <!-- FORM CREAZIONE POST -->
+  <div id="post-section" class="hidden">
+    <h2>Crea nuovo post</h2>
+    <input type="text" id="post-title" placeholder="Titolo" />
+    <input type="text" id="post-slug" placeholder="Slug (url friendly)" />
+    <textarea id="post-excerpt" placeholder="Estratto"></textarea>
+    <textarea id="post-content" placeholder="Contenuto"></textarea>
+    <label>
+      <input type="checkbox" id="post-published" checked /> Pubblicato
+    </label>
+    <button id="create-btn">Crea Post</button>
+    <p id="post-msg"></p>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
