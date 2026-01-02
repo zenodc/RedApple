@@ -1,10 +1,17 @@
 // js/article.js
 
-// 1. Stessi articoli mock di blog.js
+// =======================
+// Utility
+// =======================
+
 function getSlug() {
   const params = new URLSearchParams(window.location.search);
   return params.get('slug');
 }
+
+// =======================
+// Fetch post
+// =======================
 
 async function fetchPost(slug) {
   try {
@@ -17,92 +24,60 @@ async function fetchPost(slug) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const slug = getSlug();
-  const post = await fetchPost(slug);
-  renderPost(post);
-  renderComments(post?._id); // qui puoi poi fare fetch commenti reali
-});
+// =======================
+// Rendering post
+// =======================
 
-
-// Commenti mock
-const mockComments = {
-  1: [
-    {
-      author: "Mario",
-      text: "Articolo molto interessante, grazie.",
-      date: "2025-01-02"
-    }
-  ],
-  2: [
-    {
-      author: "Laura",
-      text: "Condivido pienamente il discorso sulla musica.",
-      date: "2025-01-11"
-    },
-    {
-      author: "Giovanni",
-      text: "Bellissimo riferimento al jazz.",
-      date: "2025-01-12"
-    }
-  ],
-  3: []
-};
-
-
-// 2. Legge l'id dall'URL
-function getPostId() {
-  const params = new URLSearchParams(window.location.search);
-  return parseInt(params.get("id"), 10);
-}
-
-// 3. Rendering del singolo articolo
 function renderPost(post) {
-  const container = document.getElementById("post");
+  const container = document.getElementById('post');
 
   if (!post) {
-    container.innerHTML = "<p>Articolo non trovato.</p>";
+    container.innerHTML = '<p>Articolo non trovato.</p>';
     return;
   }
 
   container.innerHTML = `
-    <h2 class="post-title">${post.title}</h2>
+    <h1 class="post-title">${post.title}</h1>
 
     <div class="post-meta">
-      <time datetime="${post.date}">
-        ${new Date(post.date).toLocaleDateString("it-IT")}
+      <time datetime="${post.createdAt}">
+        ${new Date(post.createdAt).toLocaleDateString('it-IT')}
       </time>
     </div>
 
     <div class="post-content">
-      <p>${post.text}</p>
+      ${post.content}
     </div>
-
-    <ul class="post-tags">
-      ${post.tags.map(tag => `<li>#${tag}</li>`).join("")}
-    </ul>
   `;
 }
 
+// =======================
+// Commenti mock (temporanei)
+// =======================
+
+const mockComments = {
+  // postId: [ { author, text, date } ]
+};
+
 function renderComments(postId) {
-  const list = document.getElementById("comments-list");
-  list.innerHTML = "";
+  const list = document.getElementById('comments-list');
+  list.innerHTML = '';
 
   const comments = mockComments[postId] || [];
 
   if (comments.length === 0) {
-    list.innerHTML = "<p>Nessun commento.</p>";
+    list.innerHTML = '<p>Nessun commento.</p>';
     return;
   }
 
   comments.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "comment";
+    const div = document.createElement('div');
+    div.className = 'comment';
 
     div.innerHTML = `
       <div class="comment-meta">
-        <strong>${c.author}</strong> — 
-        ${new Date(c.date).toLocaleDateString("it-IT")}
+        <strong>${c.author}</strong> —
+        ${new Date(c.date).toLocaleDateString('it-IT')}
       </div>
       <div class="comment-text">
         ${c.text}
@@ -114,13 +89,14 @@ function renderComments(postId) {
 }
 
 function setupCommentForm(postId) {
-  const form = document.getElementById("comment-form");
+  const form = document.getElementById('comment-form');
+  if (!form) return;
 
-  form.addEventListener("submit", event => {
+  form.addEventListener('submit', event => {
     event.preventDefault();
 
-    const author = document.getElementById("author").value;
-    const text = document.getElementById("comment-text").value;
+    const author = document.getElementById('author').value;
+    const text = document.getElementById('comment-text').value;
 
     const newComment = {
       author,
@@ -139,13 +115,19 @@ function setupCommentForm(postId) {
   });
 }
 
+// =======================
+// Bootstrap
+// =======================
 
+document.addEventListener('DOMContentLoaded', async () => {
+  const slug = getSlug();
+  if (!slug) return;
 
-// 4. Avvio
-document.addEventListener("DOMContentLoaded", () => {
-  const postId = getPostId();
-  const post = mockPosts.find(p => p.id === postId);
+  const post = await fetchPost(slug);
   renderPost(post);
-  renderComments(postId);
-  setupCommentForm(postId);
+
+  if (post && post._id) {
+    renderComments(post._id);
+    setupCommentForm(post._id);
+  }
 });
