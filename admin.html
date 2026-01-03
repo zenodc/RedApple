@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
@@ -32,3 +32,39 @@
 <script src="js/admin.js"></script>
 </body>
 </html>
+-->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Blog</title>
+  <link rel="stylesheet" href="cc/style.css">
+</head>
+<body>
+  <h1>Admin Blog</h1>
+
+  <!-- Form Creazione / Modifica Post -->
+  <form id="postForm">
+    <input type="hidden" id="postId">
+    <label>
+      Titolo:<br>
+      <input type="text" id="title" required>
+    </label><br><br>
+    <label>
+      Contenuto:<br>
+      <textarea id="content" rows="6" required></textarea>
+    </label><br><br>
+    <button type="submit">Salva Post</button>
+    <button type="button" id="resetForm">Annulla Modifica</button>
+  </form>
+
+  <hr>
+
+  <h2>Lista Post</h2>
+  <div id="postsList"></div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
+
