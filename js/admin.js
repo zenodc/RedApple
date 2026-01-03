@@ -1,82 +1,84 @@
-// js/admin.js
+const API_URL = "https://blog-comments-api.onrender.com";
 
-const API_BASE = 'https://blog-comments-api.onrender.com';
+const loginSection = document.getElementById("login-section");
+const cmsSection = document.getElementById("cms-section");
 
-let token = null;
+const loginBtn = document.getElementById("login-btn");
+const logoutBtn = document.getElementById("logout-btn");
+const publishBtn = document.getElementById("publish-btn");
 
-// -------- LOGIN --------
-document.getElementById('login-btn').addEventListener('click', async () => {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  const msg = document.getElementById('login-msg');
+const loginError = document.getElementById("login-error");
+const cmsMessage = document.getElementById("cms-message");
 
-  msg.textContent = '';
+// Controllo token all'avvio
+const token = localStorage.getItem("token");
+if (token) {
+  showCMS();
+}
+
+loginBtn.addEventListener("click", async () => {
+  loginError.textContent = "";
+
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
   try {
-    const res = await fetch(`${API_BASE}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ username, password })
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-      msg.textContent = data.message || 'Errore login';
-      return;
+      throw new Error("Credenziali non valide");
     }
 
-    token = data.token;
-    msg.textContent = 'Login effettuato ✅';
-    document.getElementById('login-section').classList.add('hidden');
-    document.getElementById('post-section').classList.remove('hidden');
+    const data = await res.json();
+    localStorage.setItem("token", data.token);
+    showCMS();
 
   } catch (err) {
-    console.error(err);
-    msg.textContent = 'Errore di connessione';
+    loginError.textContent = err.message;
   }
 });
 
-// -------- CREAZIONE POST --------
-document.getElementById('create-btn').addEventListener('click', async () => {
-  if (!token) return alert('Non sei loggato');
+publishBtn.addEventListener("click", async () => {
+  cmsMessage.textContent = "";
 
-  const title = document.getElementById('post-title').value;
-  const slug = document.getElementById('post-slug').value;
-  const excerpt = document.getElementById('post-excerpt').value;
-  const content = document.getElementById('post-content').value;
-  const published = document.getElementById('post-published').checked;
-  const msg = document.getElementById('post-msg');
-
-  msg.textContent = '';
+  const title = document.getElementById("title").value;
+  const content = document.getElementById("content").value;
 
   try {
-    const res = await fetch(`${API_BASE}/posts`, {
-      method: 'POST',
+    const res = await fetch(`${API_URL}/posts`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
       },
-      body: JSON.stringify({ title, slug, excerpt, content, published })
+      body: JSON.stringify({ title, content })
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-      msg.textContent = data.message || 'Errore creazione post';
-      return;
+      throw new Error("Errore nella pubblicazione");
     }
 
-    msg.textContent = 'Post creato ✅';
-    // reset form
-    document.getElementById('post-title').value = '';
-    document.getElementById('post-slug').value = '';
-    document.getElementById('post-excerpt').value = '';
-    document.getElementById('post-content').value = '';
-    document.getElementById('post-published').checked = true;
+    cmsMessage.textContent = "Articolo pubblicato ✔";
+    document.getElementById("title").value = "";
+    document.getElementById("content").value = "";
 
   } catch (err) {
-    console.error(err);
-    msg.textContent = 'Errore di connessione';
+    cmsMessage.textContent = err.message;
   }
 });
+
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("token");
+  location.reload();
+});
+
+function showCMS() {
+  loginSection.style.display = "none";
+  cmsSection.style.display = "block";
+}
