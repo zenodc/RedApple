@@ -1,5 +1,4 @@
 // js/article.js
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 // =======================
 // Utility
@@ -24,7 +23,6 @@ async function fetchPost(slug) {
     return null;
   }
 }
-
 // =======================
 // Rendering post
 // =======================
@@ -37,6 +35,9 @@ function renderPost(post) {
     return;
   }
 
+  // parsing Markdown → HTML
+  const parsedContent = marked.parse(post.content);
+
   container.innerHTML = `
     <h1 class="post-title">${post.title}</h1>
 
@@ -47,7 +48,7 @@ function renderPost(post) {
     </div>
 
     <div class="post-content">
-      ${post.content}
+      ${parsedContent}
     </div>
   `;
 }
