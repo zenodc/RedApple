@@ -1,4 +1,5 @@
 // js/blog.js
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('articles');
