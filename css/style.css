@@ -89,6 +89,25 @@ body {
   color: #555;
 }
 
+/* Blocchi dialogici */
+
+.post-content .question {
+  border: 1px solid #ccc;
+  border-left: 4px solid #444;
+  background-color: #fafafa;
+  padding: 1em 1.2em;
+  margin: 1.5em 0;
+  border-radius: 4px;
+}
+
+.post-content .question p:first-child {
+  margin-top: 0;
+}
+
+.post-content .question p:last-child {
+  margin-bottom: 0;
+}
+
 
 /* Tag */
 .post-tags {
