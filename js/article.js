@@ -23,6 +23,18 @@ async function fetchPost(slug) {
     return null;
   }
 }
+
+// =======================
+// Preprocess dialogo
+// =======================
+function preprocessDialogue(md) {
+  return md.replace(
+    /:::question\s+([\s\S]*?)\s+:::/g,
+    '<div class="question">\n$1\n</div>'
+  );
+}
+
+
 // =======================
 // Rendering post
 // =======================
@@ -35,18 +47,11 @@ function renderPost(post) {
     return;
   }
 
- // preprocessa il testo prima del parsing markdown
-  function preprocessDialogue(md) {
-  return md
-    // blocchi question
-    .replace(
-      /:::question\s+([\s\S]*?)\s+:::/g,
-      '<div class="question">\n$1\n</div>'
-    );
-}
+  // 1. preprocessa il testo
+  const processedContent = preprocessDialogue(post.content);
 
-  // parsing Markdown → HTML
-  const parsedContent = marked.parse(post.content);
+  // 2. parsing Markdown → HTML
+  const parsedContent = marked.parse(processedContent);
 
   container.innerHTML = `
     <h1 class="post-title">${post.title}</h1>
@@ -62,6 +67,7 @@ function renderPost(post) {
     </div>
   `;
 }
+
 
 // =======================
 // Commenti mock (temporanei)
