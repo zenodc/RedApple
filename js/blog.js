@@ -1,6 +1,3 @@
-// js/blog.js
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('articles');
   container.innerHTML = '';
@@ -15,6 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const article = document.createElement('article');
       article.className = 'post';
 
+      // parsing Markdown dell'excerpt
+      const parsedExcerpt = marked.parse(post.excerpt || '');
+
       article.innerHTML = `
         <h2 class="post-title">
           <a href="article.html?slug=${post.slug}">${post.title}</a>
@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           </time>
         </div>
 
-        <p class="post-excerpt">
-          ${post.excerpt}
-        </p>
+        <div class="post-excerpt">
+          ${parsedExcerpt}
+        </div>
       `;
 
       container.appendChild(article);
