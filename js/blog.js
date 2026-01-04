@@ -1,41 +1,57 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('articles');
   container.innerHTML = '';
 
-  try {
-    const res = await fetch('https://blog-comments-api.onrender.com/posts');
-    if (!res.ok) throw new Error('Errore fetch post');
+  // Loader + messaggio server in avvio
+  const loader = document.createElement('div');
+  loader.id = 'loader';
+  loader.innerHTML = `
+    <div class="spinner"></div>
+    <p>Server in avvio, attendere prego…</p>
+  `;
+  container.appendChild(loader);
 
-    const posts = await res.json();
+  // Funzione per caricare i post
+  async function fetchPosts() {
+    try {
+      const res = await fetch('https://blog-comments-api.onrender.com/posts');
+      if (!res.ok) throw new Error('Server non pronto');
 
-    posts.forEach(post => {
-      const article = document.createElement('article');
-      article.className = 'post';
+      const posts = await res.json();
 
-      // parsing Markdown dell'excerpt
-      const parsedExcerpt = marked.parse(post.excerpt || '');
+      // Puliamo il container e rimuoviamo loader
+      container.innerHTML = '';
 
-      article.innerHTML = `
-        <h2 class="post-title">
-          <a href="article.html?slug=${post.slug}">${post.title}</a>
-        </h2>
+      posts.forEach(post => {
+        const article = document.createElement('article');
+        article.className = 'post';
 
-        <div class="post-meta">
-          <time datetime="${post.createdAt}">
-            ${new Date(post.createdAt).toLocaleDateString('it-IT')}
-          </time>
-        </div>
+        // Nota: gli excerpt restano in HTML semplice
+        article.innerHTML = `
+          <h2 class="post-title">
+            <a href="article.html?slug=${post.slug}">${post.title}</a>
+          </h2>
 
-        <div class="post-excerpt">
-          ${parsedExcerpt}
-        </div>
-      `;
+          <div class="post-meta">
+            <time datetime="${post.createdAt}">
+              ${new Date(post.createdAt).toLocaleDateString('it-IT')}
+            </time>
+          </div>
 
-      container.appendChild(article);
-    });
+          <div class="post-excerpt">
+            ${post.excerpt || ''}
+          </div>
+        `;
 
-  } catch (err) {
-    container.innerHTML = '<p>Errore nel caricamento dei post.</p>';
-    console.error(err);
+        container.appendChild(article);
+      });
+
+    } catch (err) {
+      console.warn('Server non pronto, riprovo tra 2 secondi...');
+      setTimeout(fetchPosts, 2000);
+    }
   }
+
+  // Avvio primo fetch
+  fetchPosts();
 });
