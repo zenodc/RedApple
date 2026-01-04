@@ -1,39 +1,67 @@
-/* const API_URL = "https://blog-comments-api.onrender.com";
+const API_URL = "https://blog-comments-api.onrender.com";
 
+// =======================
+// ELEMENTI DOM
+// =======================
 const loginSection = document.getElementById("login-section");
 const cmsSection = document.getElementById("cms-section");
 
 const loginBtn = document.getElementById("login-btn");
 const logoutBtn = document.getElementById("logout-btn");
-const publishBtn = document.getElementById("publish-btn");
 
 const loginError = document.getElementById("login-error");
 const cmsMessage = document.getElementById("cms-message");
 
-// Controllo token all'avvio
-const token = localStorage.getItem("token");
-if (token) {
-  showCMS();
+const postForm = document.getElementById("postForm");
+const postsList = document.getElementById("postsList");
+const postIdInput = document.getElementById("postId");
+const titleInput = document.getElementById("title");
+const contentInput = document.getElementById("content");
+const resetBtn = document.getElementById("resetForm");
+
+// =======================
+// STATO AUTH
+// =======================
+function getToken() {
+  return localStorage.getItem("token");
 }
 
+function showLogin() {
+  loginSection.style.display = "block";
+  cmsSection.style.display = "none";
+}
+
+function showCMS() {
+  loginSection.style.display = "none";
+  cmsSection.style.display = "block";
+  fetchPosts();
+}
+
+// =======================
+// AVVIO
+// =======================
+document.addEventListener("DOMContentLoaded", () => {
+  const token = getToken();
+  token ? showCMS() : showLogin();
+});
+
+// =======================
+// LOGIN
+// =======================
 loginBtn.addEventListener("click", async () => {
   loginError.textContent = "";
 
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   try {
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
     });
 
-    if (!res.ok) {
-      throw new Error("Credenziali non valide");
-    }
+    if (!res.ok) throw new Error("Credenziali non valide");
 
     const data = await res.json();
     localStorage.setItem("token", data.token);
@@ -44,91 +72,44 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
-publishBtn.addEventListener("click", async () => {
-  cmsMessage.textContent = "";
-
-  const title = document.getElementById("title").value;
-  const content = document.getElementById("content").value;
-
-  try {
-    const res = await fetch(`${API_URL}/posts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({ title, content })
-    });
-
-    if (!res.ok) {
-      throw new Error("Errore nella pubblicazione");
-    }
-
-    cmsMessage.textContent = "Articolo pubblicato ✔";
-    document.getElementById("title").value = "";
-    document.getElementById("content").value = "";
-
-  } catch (err) {
-    cmsMessage.textContent = err.message;
-  }
-});
-
+// =======================
+// LOGOUT
+// =======================
 logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("token");
-  location.reload();
+  showLogin();
 });
 
-function showCMS() {
-  loginSection.style.display = "none";
-  cmsSection.style.display = "block";
-}
-*/
-const API_URL = "https://blog-comments-api.onrender.com";
-const token = localStorage.getItem("token");
-
-const postForm = document.getElementById("postForm");
-const postsList = document.getElementById("postsList");
-const postIdInput = document.getElementById("postId");
-const titleInput = document.getElementById("title");
-const contentInput = document.getElementById("content");
-const resetBtn = document.getElementById("resetForm");
-
-// Carica lista post all'avvio
-window.addEventListener("DOMContentLoaded", fetchPosts);
-
-// Invia POST o PUT
+// =======================
+// CREA / MODIFICA POST
+// =======================
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const token = getToken();
+  if (!token) return showLogin();
 
   const id = postIdInput.value;
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
 
-  if (!title || !content) return alert("Titolo e contenuto obbligatori");
+  if (!title || !content) {
+    alert("Titolo e contenuto obbligatori");
+    return;
+  }
 
   try {
-    let res;
-    if (id) {
-      // Modifica
-      res = await fetch(`${API_URL}/posts/${id}`, {
-        method: "PUT",
+    const res = await fetch(
+      id ? `${API_URL}/posts/${id}` : `${API_URL}/posts`,
+      {
+        method: id ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ title, content })
-      });
-    } else {
-      // Creazione
-      res = await fetch(`${API_URL}/posts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ title, content })
-      });
-    }
+      }
+    );
 
     if (!res.ok) throw new Error("Errore nella pubblicazione");
 
@@ -138,37 +119,41 @@ postForm.addEventListener("submit", async (e) => {
 
   } catch (err) {
     alert(err.message);
-    console.error(err);
   }
 });
 
-// Reset form
+// =======================
+// RESET FORM
+// =======================
 resetBtn.addEventListener("click", () => {
   postForm.reset();
   postIdInput.value = "";
 });
 
-// Funzione: carica lista post
+// =======================
+// FETCH POST
+// =======================
 async function fetchPosts() {
   try {
-    const res = await fetch(`${API_URL}/posts`, { method: "GET" });
-    if (!res.ok) throw new Error("Errore nel caricamento dei post");
+    const res = await fetch(`${API_URL}/posts`);
+    if (!res.ok) throw new Error("Errore caricamento post");
 
     const posts = await res.json();
     renderPosts(posts);
 
   } catch (err) {
-    console.error(err);
-    postsList.innerHTML = "<p>Errore nel caricamento dei post</p>";
+    postsList.innerHTML = "<p>Errore nel caricamento</p>";
   }
 }
 
-// Render lista post
+// =======================
+// RENDER POST
+// =======================
 function renderPosts(posts) {
   postsList.innerHTML = "";
 
   if (!posts.length) {
-    postsList.innerHTML = "<p>Nessun post pubblicato</p>";
+    postsList.innerHTML = "<p>Nessun post</p>";
     return;
   }
 
@@ -177,8 +162,7 @@ function renderPosts(posts) {
     div.className = "postItem";
     div.innerHTML = `
       <h3>${post.title}</h3>
-      <p>${post.excerpt || ""}</p>
-      <button onclick="editPost('${post._id}', '${escapeHtml(post.title)}', '${escapeHtml(post.content)}')">Modifica</button>
+      <button onclick="editPost('${post._id}', \`${escapeHtml(post.title)}\`, \`${escapeHtml(post.content)}\`)">Modifica</button>
       <button onclick="deletePost('${post._id}')">Elimina</button>
       <hr>
     `;
@@ -186,38 +170,37 @@ function renderPosts(posts) {
   });
 }
 
-// Funzione: Modifica post
+// =======================
+// EDIT / DELETE
+// =======================
 function editPost(id, title, content) {
   postIdInput.value = id;
-  titleInput.value = unescapeHtml(title);
-  contentInput.value = unescapeHtml(content);
+  titleInput.value = title;
+  contentInput.value = content;
 }
 
-// Funzione: elimina post
 async function deletePost(id) {
-  if (!confirm("Sei sicuro di voler cancellare questo post?")) return;
+  if (!confirm("Cancellare questo post?")) return;
 
   try {
     const res = await fetch(`${API_URL}/posts/${id}`, {
       method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` }
+      headers: {
+        "Authorization": `Bearer ${getToken()}`
+      }
     });
 
-    if (!res.ok) throw new Error("Errore nella cancellazione");
-
+    if (!res.ok) throw new Error("Errore cancellazione");
     fetchPosts();
+
   } catch (err) {
     alert(err.message);
-    console.error(err);
   }
 }
 
-// Escape HTML per sicurezza
+// =======================
+// UTILS
+// =======================
 function escapeHtml(str) {
-  return str.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+  return str.replace(/`/g, "\\`").replace(/\$/g, "\\$");
 }
-
-function unescapeHtml(str) {
-  return str.replace(/&#39;/g, "'").replace(/&quot;/g, '"');
-}
-
