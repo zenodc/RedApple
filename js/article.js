@@ -35,6 +35,16 @@ function renderPost(post) {
     return;
   }
 
+ // preprocessa il testo prima del parsing markdown
+  function preprocessDialogue(md) {
+  return md
+    // blocchi question
+    .replace(
+      /:::question\s+([\s\S]*?)\s+:::/g,
+      '<div class="question">\n$1\n</div>'
+    );
+}
+
   // parsing Markdown → HTML
   const parsedContent = marked.parse(post.content);
 
