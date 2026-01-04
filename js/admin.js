@@ -1,6 +1,4 @@
 const API_URL = "https://blog-comments-api.onrender.com";
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 
 document.addEventListener("DOMContentLoaded", () => {
   // =======================
@@ -20,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const titleInput = document.getElementById("title");
   const contentInput = document.getElementById("content");
   const resetBtn = document.getElementById("resetForm");
-  const postContainer = document.getElementById("postContent");
 
   // =======================
   // GESTIONE TOKEN
