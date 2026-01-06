@@ -1,55 +1,215 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Blog</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <h1>Admin Blog</h1>
+const API_URL = "https://blog-comments-api.onrender.com";
 
-  <!-- ===================== -->
-  <!-- SEZIONE LOGIN -->
-  <!-- ===================== -->
-  <section id="login-section">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button type="button" id="login-btn">Login</button>
-    <p id="login-error" style="color:red;"></p>
-  </section>
+document.addEventListener("DOMContentLoaded", () => {
+  // =======================
+  // ELEMENTI DOM
+  // =======================
+  const loginSection = document.getElementById("login-section");
+  const cmsSection = document.getElementById("cms-section");
 
-  <!-- ===================== -->
-  <!-- SEZIONE CMS -->
-  <!-- ===================== -->
-  <section id="cms-section" style="display:none;">
-    <h2>Nuovo articolo</h2>
+  const loginBtn = document.getElementById("login-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+  const loginError = document.getElementById("login-error");
+  const cmsMessage = document.getElementById("cms-message");
 
-    <form id="postForm">
-      <input type="hidden" id="postId">
-      <label>
-        Titolo:<br>
-        <input type="text" id="title" required style="width:100%; padding:5px;">
-      </label><br><br>
-      <label>
-        Contenuto:<br>
-        <textarea id="content" rows="15" style="width:100%; padding:10px;" 
-                  placeholder="Scrivi qui il contenuto del post in Markdown, usa :::question per le domande..." required></textarea>
-      </label><br><br>
-      <button type="submit">Salva Post</button>
-      <button type="button" id="resetForm">Annulla Modifica</button>
-    </form>
+  const postForm = document.getElementById("postForm");
+  const postsList = document.getElementById("postsList");
+  const postIdInput = document.getElementById("postId");
+  const titleInput = document.getElementById("title");
+  const contentInput = document.getElementById("content");
 
-    <button id="logout-btn">Logout</button>
-    <p id="cms-message"></p>
+  const resetBtn = document.getElementById("resetForm");
 
-    <hr>
-    <h2>Lista Post</h2>
-    <div id="postsList"></div>
-  </section>
+  // =======================
+  // CACHE POST
+  // =======================
+  let postsCache = [];
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="js/admin.js"></script>
-</body>
-</html>
+  // =======================
+  // GESTIONE TOKEN
+  // =======================
+  function getToken() {
+    return localStorage.getItem("token");
+  }
+
+  function showLogin() {
+    loginSection.style.display = "block";
+    cmsSection.style.display = "none";
+    cmsMessage.textContent = "";
+  }
+
+  function showCMS() {
+    loginSection.style.display = "none";
+    cmsSection.style.display = "block";
+    cmsMessage.textContent = "";
+    fetchPosts();
+  }
+
+  // =======================
+  // AVVIO
+  // =======================
+  getToken() ? showCMS() : showLogin();
+
+  // =======================
+  // LOGIN
+  // =======================
+  loginBtn.addEventListener("click", async () => {
+    loginError.textContent = "";
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!username || !password) {
+      loginError.textContent = "Inserisci username e password";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!res.ok) throw new Error("Credenziali non valide");
+
+      const data = await res.json();
+      localStorage.setItem("token", data.token);
+      showCMS();
+
+    } catch (err) {
+      loginError.textContent = err.message;
+    }
+  });
+
+  // =======================
+  // LOGOUT
+  // =======================
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    showLogin();
+  });
+
+  // =======================
+  // CREA / MODIFICA POST
+  // =======================
+  postForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const token = getToken();
+    if (!token) return showLogin();
+
+    const id = postIdInput.value;
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+
+    if (!title || !content) {
+      alert("Titolo e contenuto obbligatori");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        id ? `${API_URL}/posts/${id}` : `${API_URL}/posts`,
+        {
+          method: id ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ title, content })
+        }
+      );
+
+      if (!res.ok) throw new Error("Errore nella pubblicazione");
+
+      postForm.reset();
+      postIdInput.value = "";
+      fetchPosts();
+
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // =======================
+  // RESET FORM
+  // =======================
+  resetBtn.addEventListener("click", () => {
+    postForm.reset();
+    postIdInput.value = "";
+  });
+
+  // =======================
+  // FETCH POSTS
+  // =======================
+  async function fetchPosts() {
+    try {
+      const res = await fetch(`${API_URL}/posts`);
+      if (!res.ok) throw new Error("Errore caricamento post");
+
+      postsCache = await res.json();
+      renderPosts(postsCache);
+
+    } catch (err) {
+      postsList.innerHTML = "<p>Errore nel caricamento dei post</p>";
+    }
+  }
+
+  // =======================
+  // RENDER POSTS
+  // =======================
+  function renderPosts(posts) {
+    postsList.innerHTML = "";
+
+    if (!posts.length) {
+      postsList.innerHTML = "<p>Nessun post pubblicato</p>";
+      return;
+    }
+
+    posts.forEach(post => {
+      const div = document.createElement("div");
+      div.className = "postItem";
+      div.innerHTML = `
+        <h3>${post.title}</h3>
+        <button onclick="editPost('${post._id}')">Modifica</button>
+        <button onclick="deletePost('${post._id}')">Elimina</button>
+        <hr>
+      `;
+      postsList.appendChild(div);
+    });
+  }
+
+  // =======================
+  // EDIT / DELETE
+  // =======================
+  window.editPost = (id) => {
+    const post = postsCache.find(p => p._id === id);
+    if (!post) return alert("Post non trovato nella lista");
+
+    postIdInput.value = post._id;
+    titleInput.value = post.title;
+    contentInput.value = post.content;
+    contentInput.focus();
+  };
+
+  window.deletePost = async (id) => {
+    if (!confirm("Cancellare questo post?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/posts/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${getToken()}`
+        }
+      });
+
+      if (!res.ok) throw new Error("Errore cancellazione");
+      fetchPosts();
+
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+});
