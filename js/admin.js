@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const postIdInput = document.getElementById("postId");
   const titleInput = document.getElementById("title");
   const contentInput = document.getElementById("content");
+
   const resetBtn = document.getElementById("resetForm");
 
   // =======================
@@ -151,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =======================
-  // RENDER POST
+  // RENDER POSTS
   // =======================
   function renderPosts(posts) {
     postsList.innerHTML = "";
@@ -166,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
       div.className = "postItem";
       div.innerHTML = `
         <h3>${post.title}</h3>
-        <button onclick="editPost('${post._id}', \`${escapeHtml(post.title)}\`, \`${escapeHtml(post.content)}\`)">Modifica</button>
+        <button onclick="editPost('${post._id}')">Modifica</button>
         <button onclick="deletePost('${post._id}')">Elimina</button>
         <hr>
       `;
@@ -177,10 +178,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
   // EDIT / DELETE
   // =======================
-  window.editPost = (id, title, content) => {
-    postIdInput.value = id;
-    titleInput.value = title;
-    contentInput.value = content;
+  window.editPost = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/posts/${id}`);
+      if (!res.ok) throw new Error("Errore recupero post");
+      const post = await res.json();
+
+      postIdInput.value = post._id;
+      titleInput.value = post.title;
+      contentInput.value = post.content;
+
+      // opzionale: porta focus sul contenuto
+      contentInput.focus();
+
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   window.deletePost = async (id) => {
@@ -201,12 +214,5 @@ document.addEventListener("DOMContentLoaded", () => {
       alert(err.message);
     }
   };
-
-  // =======================
-  // UTILS
-  // =======================
-  function escapeHtml(str) {
-    return str.replace(/`/g, "\\`").replace(/\$/g, "\\$");
-  }
 
 });
