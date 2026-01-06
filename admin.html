@@ -30,11 +30,12 @@
       <input type="hidden" id="postId">
       <label>
         Titolo:<br>
-        <input type="text" id="title" required>
+        <input type="text" id="title" required style="width:100%; padding:5px;">
       </label><br><br>
       <label>
         Contenuto:<br>
-        <textarea id="content" rows="6" required></textarea>
+        <textarea id="content" rows="15" style="width:100%; padding:10px;" 
+                  placeholder="Scrivi qui il contenuto del post in Markdown, usa :::question per le domande..." required></textarea>
       </label><br><br>
       <button type="submit">Salva Post</button>
       <button type="button" id="resetForm">Annulla Modifica</button>
