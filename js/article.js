@@ -1,4 +1,9 @@
-// js/article.js
+import { preprocessDialogue, extractExcerpt } from './dialogueUtils.js';
+
+const excerptMd = extractExcerpt(post.content);
+const processed = preprocessDialogue(excerptMd);
+const excerptHtml = marked.parse(processed);
+
 
 // =======================
 // Utility
