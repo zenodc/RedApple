@@ -108,6 +108,16 @@ body {
   margin-bottom: 0;
 }
 
+/* Stile per le domande */
+.question {
+  border: 1px solid #888;      /* bordo grigio */
+  padding: 10px;               /* spazio interno */
+  margin: 10px 0;              /* spazio esterno sopra e sotto */
+  background-color: #f9f9f9;   /* sfondo leggermente diverso */
+  border-radius: 4px;           /* angoli leggermente arrotondati */
+}
+
+
 
 /* Tag */
 .post-tags {
