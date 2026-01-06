@@ -30,27 +30,9 @@ async function fetchPost(slug) {
 }
 
 // =======================
-// Preprocess dialogo
-// =======================
-function preprocessDialogue(md) {
-  return md.replace(
-    /:::question\s+([\s\S]*?)\s+:::/g,
-    '<div class="question">\n$1\n</div>'
-  );
-}
-
-
-// =======================
-// Rendering post
+// rendering post
 // =======================
 
-function renderPost(post) {
-  const container = document.getElementById('post');
-
-  if (!post) {
-    container.innerHTML = '<p>Articolo non trovato.</p>';
-    return;
-  }
 
   // 1. preprocessa il testo
   const processedContent = preprocessDialogue(post.content);
