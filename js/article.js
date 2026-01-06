@@ -1,10 +1,5 @@
 import { preprocessDialogue, extractExcerpt } from './dialogueUtils.js';
 
-const excerptMd = extractExcerpt(post.content);
-const processed = preprocessDialogue(excerptMd);
-const excerptHtml = marked.parse(processed);
-
-
 // =======================
 // Utility
 // =======================
@@ -30,14 +25,18 @@ async function fetchPost(slug) {
 }
 
 // =======================
-// rendering post
+// Rendering post
 // =======================
 
+function renderPost(post) {
+  const container = document.getElementById('post');
 
-  // 1. preprocessa il testo
+  if (!post) {
+    container.innerHTML = '<p>Articolo non trovato.</p>';
+    return;
+  }
+
   const processedContent = preprocessDialogue(post.content);
-
-  // 2. parsing Markdown → HTML
   const parsedContent = marked.parse(processedContent);
 
   container.innerHTML = `
@@ -54,7 +53,6 @@ async function fetchPost(slug) {
     </div>
   `;
 }
-
 
 // =======================
 // Commenti mock (temporanei)
