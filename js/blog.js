@@ -1,3 +1,10 @@
+import { preprocessDialogue, extractExcerpt } from './dialogueUtils.js';
+
+const excerptMd = extractExcerpt(post.content);
+const processed = preprocessDialogue(excerptMd);
+const excerptHtml = marked.parse(processed);
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('articles');
   container.innerHTML = '';
