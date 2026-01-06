@@ -1,64 +1,51 @@
 import { preprocessDialogue, extractExcerpt } from './dialogueUtils.js';
 
-const excerptMd = extractExcerpt(post.content);
-const processed = preprocessDialogue(excerptMd);
-const excerptHtml = marked.parse(processed);
+const container = document.getElementById('articles');
 
+// Puliamo eventuale loader iniziale
+container.innerHTML = '';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const container = document.getElementById('articles');
-  container.innerHTML = '';
+async function fetchPosts() {
+  try {
+    const res = await fetch('https://blog-comments-api.onrender.com/posts');
+    if (!res.ok) throw new Error('Server non pronto');
 
-  // Loader + messaggio server in avvio
-  const loader = document.createElement('div');
-  loader.id = 'loader';
-  loader.innerHTML = `
-    <div class="spinner"></div>
-    <p>Server in avvio, attendere prego…</p>
-  `;
-  container.appendChild(loader);
+    const posts = await res.json();
 
-  // Funzione per caricare i post
-  async function fetchPosts() {
-    try {
-      const res = await fetch('https://blog-comments-api.onrender.com/posts');
-      if (!res.ok) throw new Error('Server non pronto');
+    // Puliamo container prima di inserire i post
+    container.innerHTML = '';
 
-      const posts = await res.json();
+    posts.forEach(post => {
+      const excerptMd = extractExcerpt(post.content);
+      const processed = preprocessDialogue(excerptMd);
+      const excerptHtml = marked.parse(processed);
 
-      // Puliamo il container e rimuoviamo loader
-      container.innerHTML = '';
+      const article = document.createElement('article');
+      article.className = 'post';
+      article.innerHTML = `
+        <h2 class="post-title">
+          <a href="article.html?slug=${post.slug}">${post.title}</a>
+        </h2>
 
-      posts.forEach(post => {
-        const article = document.createElement('article');
-        article.className = 'post';
+        <div class="post-meta">
+          <time datetime="${post.createdAt}">
+            ${new Date(post.createdAt).toLocaleDateString('it-IT')}
+          </time>
+        </div>
 
-        // Nota: gli excerpt restano in HTML semplice
-        article.innerHTML = `
-          <h2 class="post-title">
-            <a href="article.html?slug=${post.slug}">${post.title}</a>
-          </h2>
+        <div class="post-excerpt">
+          ${excerptHtml}
+        </div>
+      `;
 
-          <div class="post-meta">
-            <time datetime="${post.createdAt}">
-              ${new Date(post.createdAt).toLocaleDateString('it-IT')}
-            </time>
-          </div>
+      container.appendChild(article);
+    });
 
-          <div class="post-excerpt">
-            ${post.excerpt || ''}
-          </div>
-        `;
-
-        container.appendChild(article);
-      });
-
-    } catch (err) {
-      console.warn('Server non pronto, riprovo tra 2 secondi...');
-      setTimeout(fetchPosts, 2000);
-    }
+  } catch (err) {
+    console.warn('Server non pronto, riprovo tra 2 secondi...');
+    setTimeout(fetchPosts, 2000);
   }
+}
 
-  // Avvio primo fetch
-  fetchPosts();
-});
+// Avvio immediato
+fetchPosts();
