@@ -21,6 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.getElementById("resetForm");
 
   // =======================
+  // CACHE POST
+  // =======================
+  let postsCache = [];
+
+  // =======================
   // GESTIONE TOKEN
   // =======================
   function getToken() {
@@ -136,15 +141,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =======================
-  // FETCH POST
+  // FETCH POSTS
   // =======================
   async function fetchPosts() {
     try {
       const res = await fetch(`${API_URL}/posts`);
       if (!res.ok) throw new Error("Errore caricamento post");
 
-      const posts = await res.json();
-      renderPosts(posts);
+      postsCache = await res.json();
+      renderPosts(postsCache);
 
     } catch (err) {
       postsList.innerHTML = "<p>Errore nel caricamento dei post</p>";
@@ -178,22 +183,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // =======================
   // EDIT / DELETE
   // =======================
-  window.editPost = async (id) => {
-    try {
-      const res = await fetch(`${API_URL}/posts/${id}`);
-      if (!res.ok) throw new Error("Errore recupero post");
-      const post = await res.json();
+  window.editPost = (id) => {
+    const post = postsCache.find(p => p._id === id);
+    if (!post) return alert("Post non trovato nella lista");
 
-      postIdInput.value = post._id;
-      titleInput.value = post.title;
-      contentInput.value = post.content;
-
-      // opzionale: porta focus sul contenuto
-      contentInput.focus();
-
-    } catch (err) {
-      alert(err.message);
-    }
+    postIdInput.value = post._id;
+    titleInput.value = post.title;
+    contentInput.value = post.content;
+    contentInput.focus();
   };
 
   window.deletePost = async (id) => {
