@@ -55,68 +55,78 @@ function renderPost(post) {
 }
 
 // =======================
-// Commenti mock (temporanei)
+// Commenti 
 // =======================
 
-const mockComments = {
-  // postId: [ { author, text, date } ]
-};
-
-function renderComments(postId) {
+async function renderComments(postId) {
   const list = document.getElementById('comments-list');
-  list.innerHTML = '';
+  list.innerHTML = '<p>Caricamento commenti…</p>';
 
-  const comments = mockComments[postId] || [];
+  try {
+    const res = await fetch(`${API_BASE}/posts/${postId}/comments`);
+    const comments = await res.json();
 
-  if (comments.length === 0) {
-    list.innerHTML = '<p>Nessun commento.</p>';
-    return;
+    list.innerHTML = '';
+
+    if (comments.length === 0) {
+      list.innerHTML = '<p>Nessun commento.</p>';
+      return;
+    }
+
+    comments.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'comment';
+
+      div.innerHTML = `
+        <div class="comment-meta">
+          <strong>${c.author}</strong> —
+          ${new Date(c.date).toLocaleDateString('it-IT')}
+        </div>
+        <div class="comment-text">
+          ${c.text}
+        </div>
+      `;
+
+      list.appendChild(div);
+    });
+
+  } catch (err) {
+    list.innerHTML = '<p>Errore nel caricamento dei commenti.</p>';
   }
-
-  comments.forEach(c => {
-    const div = document.createElement('div');
-    div.className = 'comment';
-
-    div.innerHTML = `
-      <div class="comment-meta">
-        <strong>${c.author}</strong> —
-        ${new Date(c.date).toLocaleDateString('it-IT')}
-      </div>
-      <div class="comment-text">
-        ${c.text}
-      </div>
-    `;
-
-    list.appendChild(div);
-  });
 }
 
 function setupCommentForm(postId) {
   const form = document.getElementById('comment-form');
   if (!form) return;
 
-  form.addEventListener('submit', event => {
+  form.addEventListener('submit', async event => {
     event.preventDefault();
 
     const author = document.getElementById('author').value;
     const text = document.getElementById('comment-text').value;
 
-    const newComment = {
-      author,
-      text,
-      date: new Date().toISOString()
-    };
+    try {
+      const res = await fetch(`${API_BASE}/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ author, text })
+      });
 
-    if (!mockComments[postId]) {
-      mockComments[postId] = [];
+      if (!res.ok) {
+        throw new Error('Errore POST');
+      }
+
+      form.reset();
+      renderComments(postId);
+
+    } catch (err) {
+      alert('Errore nell’invio del commento');
     }
-
-    mockComments[postId].push(newComment);
-
-    form.reset();
-    renderComments(postId);
   });
 }
+
 
 // =======================
 // Bootstrap
