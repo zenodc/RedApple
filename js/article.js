@@ -1,5 +1,8 @@
 import { preprocessDialogue, extractExcerpt } from './dialogueUtils.js';
 
+const API_BASE = 'https://blog-comments-api.onrender.com';
+
+
 // =======================
 // Utility
 // =======================
@@ -15,7 +18,7 @@ function getSlug() {
 
 async function fetchPost(slug) {
   try {
-    const res = await fetch(`https://blog-comments-api.onrender.com/posts/${slug}`);
+    const res = await fetch(`${API_BASE}/posts/${slug}`);
     if (!res.ok) throw new Error('Post non trovato');
     return await res.json();
   } catch (err) {
